@@ -37,32 +37,59 @@ A simple REST API for managing project-based waitlists. Built with Node.js, Expr
    bun start
    ```
 
+## API Authentication
+
+The API uses a two-tier authentication system:
+
+### 1. Project-Level API Token (🔑)
+
+- **Used for**: Adding entries to waitlist only
+- **Endpoint**: `POST /api/waitlist/add`
+- **Purpose**: Each project has its own unique API token that allows frontend applications to add users to that specific project's waitlist
+- **Header**: `Authorization: Bearer <project-api-token>`
+- **Security**: Limited scope - can only add entries to the specific project
+
+### 2. Environment-Level API Key (🔒)
+
+- **Used for**: All administrative operations
+- **Endpoints**: Project management, waitlist viewing, statistics, deletions
+- **Purpose**: Full administrative access to manage projects and view/manage all waitlist data
+- **Header**: `Authorization: Bearer <environment-api-key>`
+- **Configuration**: Set in `.env` file as `API_KEY`
+- **Security**: Full access - protect this key carefully
+
 ## API Endpoints
 
 ### Health Check
 
-- `GET /api/health` - Check API status
+- `GET /api/health` - Check API status (No auth required)
 
-### Projects
+### Projects (🔒 All require Environment API Key)
 
 - `POST /api/projects` - Create a new project
 - `GET /api/projects` - Get all projects
 - `GET /api/projects/:projectId` - Get project by ID
 
-### Waitlist (Main Frontend API)
+### Waitlist
 
-- `POST /api/waitlist/add` - Add someone to waitlist ⭐ **Main endpoint for frontend**
-- `GET /api/waitlist/project/:projectId` - Get waitlist entries for a project
-- `GET /api/waitlist/project/:projectId/stats` - Get waitlist statistics
-- `DELETE /api/waitlist/project/:projectId/entry/:entryId` - Delete waitlist entry
+- `POST /api/waitlist/add` - Add someone to waitlist (🔑 **Project API Token only**)
+- `GET /api/waitlist/project/:projectId` - Get waitlist entries (🔒 Environment API Key)
+- `GET /api/waitlist/project/:projectId/stats` - Get waitlist statistics (🔒 Environment API Key)
+- `DELETE /api/waitlist/project/:projectId/entry/:entryId` - Delete waitlist entry (🔒 Environment API Key)
 
-## Main Frontend Integration
+## Frontend Integration
 
-### Add to Waitlist
+### Add to Waitlist (🔑 Project API Token Required)
 
 **POST** `/api/waitlist/add`
 
-This is the main endpoint your frontend will use to add people to a waitlist.
+This is the main endpoint your frontend will use to add people to a waitlist. It requires the project's unique API token.
+
+**Authentication:**
+
+```
+Authorization: Bearer <project-api-token>
+```
 
 **Request Body:**
 
@@ -99,6 +126,7 @@ This is the main endpoint your frontend will use to add people to a waitlist.
 **Error Responses:**
 
 - `400` - Validation failed
+- `401` - Invalid or missing project API token
 - `404` - Project not found or inactive
 - `409` - Email already exists in this project's waitlist
 - `500` - Internal server error
@@ -107,12 +135,19 @@ This is the main endpoint your frontend will use to add people to a waitlist.
 
 ```javascript
 // React/JavaScript example
-const addToWaitlist = async (projectId, name, email, extra = "") => {
+const addToWaitlist = async (
+  projectApiToken,
+  projectId,
+  name,
+  email,
+  extra = ""
+) => {
   try {
     const response = await fetch("http://localhost:3000/api/waitlist/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${projectApiToken}`, // Project API token
       },
       body: JSON.stringify({
         projectId,
@@ -137,7 +172,9 @@ const addToWaitlist = async (projectId, name, email, extra = "") => {
 };
 
 // Usage
+const projectApiToken = "your-project-api-token-here";
 addToWaitlist(
+  projectApiToken,
   "507f1f77bcf86cd799439011",
   "John Doe",
   "john@example.com",
@@ -147,9 +184,19 @@ addToWaitlist(
   .catch((error) => console.error("Error:", error));
 ```
 
-## Project Management
+## Administrative Operations (🔒 Environment API Key Required)
 
-### Create Project
+All administrative operations require the environment-level API key set in your `.env` file.
+
+**Authentication Header:**
+
+```
+Authorization: Bearer <environment-api-key>
+```
+
+### Project Management
+
+#### Create Project
 
 **POST** `/api/projects`
 
@@ -161,11 +208,33 @@ addToWaitlist(
 }
 ```
 
-### Get All Projects
+**Response includes the generated `apiToken` for the project.**
+
+#### Get All Projects
 
 **GET** `/api/projects`
 
 Returns all projects with waitlist counts.
+
+#### Get Project by ID
+
+**GET** `/api/projects/:projectId`
+
+### Waitlist Management
+
+#### Get Waitlist Entries
+
+**GET** `/api/waitlist/project/:projectId`
+
+Query parameters: `page`, `limit`, `search`, `sortBy`, `sortOrder`
+
+#### Get Waitlist Statistics
+
+**GET** `/api/waitlist/project/:projectId/stats`
+
+#### Delete Waitlist Entry
+
+**DELETE** `/api/waitlist/project/:projectId/entry/:entryId`
 
 ## Database Schema
 
@@ -176,7 +245,7 @@ Returns all projects with waitlist counts.
   name: String,           // Project name
   slug: String,           // Unique slug for project
   description: String,    // Project description
-  apiToken: String,       // Auto-generated API token
+  apiToken: String,       // Auto-generated API token for project-level auth
   isActive: Boolean,      // Whether project is active
   createdAt: Date
 }
@@ -193,6 +262,22 @@ Returns all projects with waitlist counts.
   createdAt: Date
 }
 ```
+
+## Security Considerations
+
+### Project API Token (🔑)
+
+- **Scope**: Limited to adding entries to one specific project's waitlist
+- **Usage**: Safe to use in frontend applications
+- **Regeneration**: Can be regenerated if compromised
+- **Distribution**: Can be shared with frontend developers
+
+### Environment API Key (🔒)
+
+- **Scope**: Full administrative access to all projects and waitlists
+- **Usage**: Server-side only, never expose in frontend
+- **Storage**: Keep in `.env` file and environment variables
+- **Access**: Restrict to authorized administrators only
 
 ## Validation Rules
 

@@ -1,6 +1,7 @@
 import express from "express";
 import waitlistRoutes from "./waitlist.routes.js";
 import projectRoutes from "./project.routes.js";
+import { authApiMiddleware } from "../middlewares/authorization.middlewares.js";
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ router.get("/health", (req, res) => {
 });
 
 // Project routes
-router.use("/projects", projectRoutes);
+router.use("/projects", authApiMiddleware, projectRoutes);
 
 // Waitlist routes
 router.use("/waitlist", waitlistRoutes);
