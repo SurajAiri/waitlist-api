@@ -10,6 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // middlewares
+// cors open to all origins
 app.use(
   cors({
     origin: "*",
