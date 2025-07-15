@@ -314,13 +314,25 @@ For detailed testing information, see [TESTING.md](TESTING.md).
 
 ## Environment Variables
 
+Copy `.env.example` to `.env` and update the values:
+
 ```bash
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/waitlist
-JWT_SECRET=your_jwt_secret
-NODE_ENV=development
-API_KEY=your_api_key
+cp .env.example .env
 ```
+
+**Required Environment Variables:**
+
+- `PORT` - Server port (default: 3000)
+- `MONGODB_URI` - MongoDB connection string
+- `JWT_SECRET` - Secret key for JWT tokens (for future use)
+- `NODE_ENV` - Environment (development/production)
+- `API_KEY` - Environment-level API key for admin operations
+
+**Security Notes:**
+
+- Keep `API_KEY` secure - it provides full administrative access
+- Project API tokens are auto-generated and stored in database
+- Never expose environment variables in frontend code
 
 ## License
 
