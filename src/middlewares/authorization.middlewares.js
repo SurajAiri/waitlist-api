@@ -38,7 +38,6 @@ function authApiMiddleware(req, res, next) {
 async function authProjectToken(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
-    const projectId = req.body.projectId || req.query.projectId;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.sendResponse(401, {
@@ -49,11 +48,6 @@ async function authProjectToken(req, res, next) {
     const token = authHeader.split(" ")[1];
 
     const project = await projectService.findProjectByToken(token);
-    if (!project || !project.isActive || project._id.toString() !== projectId) {
-      return res.sendResponse(401, {
-        message: "Invalid or inactive project API token",
-      });
-    }
 
     if (!project) {
       return res.sendResponse(401, {

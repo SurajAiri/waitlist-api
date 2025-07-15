@@ -17,7 +17,13 @@ const validateSchema = (schema, property = "body") => {
       });
     }
 
-    req[property] = value;
+    // Only set the property if it's not 'query' (which is read-only)
+    if (property !== "query") {
+      req[property] = value;
+    } else {
+      // For query parameters, we can add validated values to a new property
+      req.validatedQuery = value;
+    }
     next();
   };
 };

@@ -95,7 +95,6 @@ Authorization: Bearer <project-api-token>
 
 ```json
 {
-  "projectId": "507f1f77bcf86cd799439011",
   "name": "John Doe",
   "email": "john@example.com",
   "extra": "Any additional information (optional)"
@@ -135,13 +134,7 @@ Authorization: Bearer <project-api-token>
 
 ```javascript
 // React/JavaScript example
-const addToWaitlist = async (
-  projectApiToken,
-  projectId,
-  name,
-  email,
-  extra = ""
-) => {
+const addToWaitlist = async (projectApiToken, name, email, extra = "") => {
   try {
     const response = await fetch("http://localhost:3000/api/waitlist/add", {
       method: "POST",
@@ -150,7 +143,6 @@ const addToWaitlist = async (
         Authorization: `Bearer ${projectApiToken}`, // Project API token
       },
       body: JSON.stringify({
-        projectId,
         name,
         email,
         extra,
@@ -175,7 +167,6 @@ const addToWaitlist = async (
 const projectApiToken = "your-project-api-token-here";
 addToWaitlist(
   projectApiToken,
-  "507f1f77bcf86cd799439011",
   "John Doe",
   "john@example.com",
   "Interested in beta access"
@@ -301,6 +292,25 @@ Query parameters: `page`, `limit`, `search`, `sortBy`, `sortOrder`
 - **Error Handling**: Consistent error responses
 - **CORS**: Enabled for frontend integration
 - **Statistics**: Built-in analytics for waitlist performance
+
+## Testing
+
+This project includes comprehensive tests to validate all endpoints and authentication mechanisms.
+
+### Quick Test Commands
+
+```bash
+# Run unit tests
+bun test
+
+# Run integration tests (requires server running)
+bun run test:api
+
+# Run all tests
+bun run test:all
+```
+
+For detailed testing information, see [TESTING.md](TESTING.md).
 
 ## Environment Variables
 

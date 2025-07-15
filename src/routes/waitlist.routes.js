@@ -9,30 +9,31 @@ import {
 
 const router = express.Router();
 
-// Main frontend endpoint - Add to waitlist
-router
-  .use(authProjectToken)
-  .post(
-    "/add",
-    validateSchema(waitlistValidators.create, "body"),
-    waitlistController.addToWaitlist
-  );
+// Main frontend endpoint - Add to waitlist (Project API Token)
+router.post(
+  "/add",
+  authProjectToken,
+  validateSchema(waitlistValidators.createWithoutProjectId, "body"),
+  waitlistController.addToWaitlist
+);
 
-// Optional admin endpoints (if needed for dashboard)
-const adminRouter = router.use(authApiMiddleware);
-adminRouter.get(
+// Admin endpoints (Environment API Key)
+router.get(
   "/project/:projectId",
+  authApiMiddleware,
   validateSchema(waitlistValidators.query, "query"),
   waitlistController.getWaitlistEntries
 );
 
-adminRouter.get(
+router.get(
   "/project/:projectId/stats",
+  authApiMiddleware,
   waitlistController.getWaitlistStats
 );
 
-adminRouter.delete(
+router.delete(
   "/project/:projectId/entry/:entryId",
+  authApiMiddleware,
   waitlistController.deleteWaitlistEntry
 );
 

@@ -3,21 +3,17 @@ import projectService from "../services/project.service.js";
 
 const waitlistController = {
   // Main endpoint for frontend to add someone to waitlist
+  // Uses project-level API token for authentication
   async addToWaitlist(req, res) {
     try {
-      const { projectId, name, email, extra } = req.body;
+      const { name, email, extra } = req.body;
 
-      // Verify project exists and is active
-      const project = await projectService.getProjectById(projectId);
-      if (!project || !project.isActive) {
-        return res.sendResponse(404, {
-          message: "Project not found or is inactive",
-        });
-      }
+      // Get project from the authenticated token (set by authProjectToken middleware)
+      const project = req.project;
 
-      // Add to waitlist
+      // Add to waitlist using the authenticated project
       const waitlistEntry = await waitlistService.addToWaitlist({
-        projectId,
+        projectId: project._id,
         name,
         email,
         extra,
@@ -55,11 +51,12 @@ const waitlistController = {
   async getWaitlistEntries(req, res) {
     try {
       const { projectId } = req.params;
-      const queryOptions = req.query;
+      const queryOptions = req.validatedQuery || req.query;
 
       // Verify project exists
-      const project = await projectService.getProjectById(projectId);
-      if (!project) {
+      try {
+        const project = await projectService.getProjectById(projectId);
+      } catch (error) {
         return res.sendResponse(404, {
           message: "Project not found",
         });
@@ -90,8 +87,9 @@ const waitlistController = {
       const { projectId } = req.params;
 
       // Verify project exists
-      const project = await projectService.getProjectById(projectId);
-      if (!project) {
+      try {
+        const project = await projectService.getProjectById(projectId);
+      } catch (error) {
         return res.sendResponse(404, {
           message: "Project not found",
         });
@@ -118,8 +116,9 @@ const waitlistController = {
       const { projectId, entryId } = req.params;
 
       // Verify project exists
-      const project = await projectService.getProjectById(projectId);
-      if (!project) {
+      try {
+        const project = await projectService.getProjectById(projectId);
+      } catch (error) {
         return res.sendResponse(404, {
           message: "Project not found",
         });

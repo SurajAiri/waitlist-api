@@ -21,17 +21,22 @@ app.get("/", (req, res) => {
 // API routes
 app.use("/api", routes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-// connect to mongodb
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB", err);
-    console.error("db uri: ", process.env.MONGODB_URI);
+// Only start server if not in test environment
+if (process.env.NODE_ENV !== "test") {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
+
+  // connect to mongodb
+  mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => {
+      console.log("Connected to MongoDB");
+    })
+    .catch((err) => {
+      console.error("Failed to connect to MongoDB", err);
+      console.error("db uri: ", process.env.MONGODB_URI);
+    });
+}
+
+export default app;
