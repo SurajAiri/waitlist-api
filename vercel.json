@@ -1,16 +1,30 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "./index.js",
-        "use": "@vercel/node"
+  "version": 2,
+  "builds": [
+    {
+      "src": "./index.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
       }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "/"
-      }
-    ]
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ],
+  "functions": {
+    "index.js": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "MONGODB_URI": "@mongodb-uri",
+    "JWT_SECRET": "@jwt-secret",
+    "API_KEY": "@api-key",
+    "NODE_ENV": "production"
   }
+}
   

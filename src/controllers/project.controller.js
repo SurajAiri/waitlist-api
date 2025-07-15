@@ -76,6 +76,8 @@ const projectController = {
       });
     }
   },
+
+  // update, delete
 };
 
 export default projectController;

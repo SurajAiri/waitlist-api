@@ -20,6 +20,11 @@ global.console = {
 // Clean up after all tests
 afterAll(async () => {
   if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.close();
+    await mongoose.disconnect();
   }
+});
+
+// Handle unhandled promise rejections in tests
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });

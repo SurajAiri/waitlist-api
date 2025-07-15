@@ -9,7 +9,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:api": "node scripts/test-api.js",
-    "test:all": "./scripts/run-tests.sh"
+    "test:all": "./scripts/run-tests.sh",
+    "monitor": "node scripts/performance-monitor.js",
+    "deploy": "vercel --prod"
   },
   "keywords": [],
   "author": "",
